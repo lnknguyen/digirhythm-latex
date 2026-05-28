@@ -187,10 +187,10 @@ Two findings emerged. First, despite the apparent variety of everyday life, peop
 Across all three studies, the two most frequent routine types accounted for $(57.63 \pm 11.43)\%$ of a participant's days on average, meaning more than half
 of daily life was spent in just two recurring patterns, with the remaining six types filling in the rest. Second, each person's routine signature was
 substantially more similar to their own than to the signatures of other individuals measured over the same time window (\autoref{fig:dself_dref}). In Tesserae ($N=148$), within-person self-distances were consistently smaller than between-person reference distances, both for Jensen-Shannon divergence
-(\dself{0.135}{0.041} vs.\ \dref{0.164}{0.026};
-\dselfdrefpl{226.03}{-8.49}{10^{-3}}) and cosine distance
-(\dself{0.031}{0.021} vs.\ \dref{0.055}{0.013};
-\dselfdrefpl{246.83}{-11.69}{10^{-3}}). The same pattern held in MoMo-Mood
+(\dself{0.116}{0.047} vs.\ \dref{0.148}{0.023};
+\dselfdrefp{213.87}{-7.3}{10^{-3}}) and cosine distance
+(\dself{0.028}{0.027} vs.\ \dref{0.052}{0.016};
+\dselfdrefp{240.26}{-9.38}{0.0}). The same pattern held in MoMo-Mood
 and GLOBEM, with full statistics reported in the Appendix. Crucially, this
 persistence was visible both over short observation windows of a few weeks in GLOBEM and over long windows of several months in Tesserae and MoMo-Mood,
 indicating that routine signatures are not a short-term artifact of a particular season.
@@ -204,16 +204,9 @@ indicating that routine signatures are not a short-term artifact of a particular
 
 \subsection*{Transition between routines exhibits similar persistence}
 
-The routine signature captures how a person allocates days across routine types but does not give information about the order in which those days occur. Two
-people could spend identical fractions of their time in the same routines and yet live very different weeks: one regularly alternates between a weekday and a weekend pattern while the other moves irregularly through several routine types. We therefore asked whether the way a person moves between routine types from one day to the next is itself person-specific and stable over time.
+The routine signature captures how a person allocates days across routine types but does not give information about the order in which those days occur. Two people could spend identical fractions of their time in the same routines and yet live very different weeks: one regularly alternates between a weekday and a weekend pattern while the other moves irregularly through several routine types. We therefore asked whether the way a person moves between routine types from one day to the next is itself person-specific and stable over time.
 
-To test this hypothesis, we first constructed a transition probability matrix 
-\(\mathbf{P} \in \mathbb{R}^{K \times K}\) for each participant and time window,  where \(K\) is the number of routine clusters. We define the transition signature of an individual as the mean row-wise  distance between their transition matrices across consecutive segments: 
-\(d_{\mathrm{self}} = 
-D(\mathbf{P}^1, \mathbf{P}^{2}) \). Similarly, the reference distance of individual $i$ was computed by calculating the distance between each participant’s transition matrix and those of all other participants in the same segment, then averaged across 
-segments: 
-\(d_{\mathrm{ref}} = \frac{1}{2} (
-D(\mathbf{P_i}^1, \mathbf{P_j}^{1}) + D(\mathbf{P_i}^2, \mathbf{P_j}^{2}))\)
+To test this hypothesis, we constructed a transition probability matrix $\mathbf{P} \in \mathbb{R}^{K \times K}$ for each participant and time window (see \autoref{sec:methods:signature}), and computed self-distance and reference-distance analogously to the routine signature, using the mean row-wise Jensen-Shannon divergence between matrices.
 
 \begin{figure}
     \centering
@@ -224,10 +217,10 @@ D(\mathbf{P_i}^1, \mathbf{P_j}^{1}) + D(\mathbf{P_i}^2, \mathbf{P_j}^{2}))\)
 
 \autoref{fig:transition-signature} presents the distributions of within- and between-person distances.
 Across all three cohorts, transition signatures were temporally stable and individually distinctive, with within-person distances consistently smaller than between-person distances. The effect was clearest in Tesserae, where a large sample of information
-workers was followed over two 135-day windows: \dself{0.481}{0.044} compared with \dref{0.537}{0.029}
-(\dselfdrefpl{255.65}{-12.86}{10^{-3}}). The same pattern held, with a larger gap between within- and between-person distances, in MoMo-Mood, despite a smaller clinical cohort observed over the same
-long windows: \dself{0.458}{0.055} compared with \dref{0.600}{0.046}
-(\dselfdrefpl{28.62}{-7.79}{10^{-3}}). In GLOBEM, where each participant was observed over much shorter 30-day windows, the gap was narrower but
+workers was followed over two 135-day windows: \dself{0.273}{0.038} compared with \dref{0.341}{0.040}
+(\dselfdrefpl{292.19}{-14.96}{10^{-3}}). The same pattern held, with a larger gap between within- and between-person distances, in MoMo-Mood, despite a smaller clinical cohort observed over the same
+long windows: \dself{0.297}{0.034} compared with \dref{0.524}{0.058}
+(\dselfdrefpl{22.34}{-13.17}{10^{-3}}). In GLOBEM, where each participant was observed over much shorter 30-day windows, the gap was narrower but
 still robust: \dself{0.565}{0.077} compared with \dref{0.598}{0.025}
 (\dselfdrefpl{238.37}{-5.59}{10^{-3}}).
 
@@ -299,7 +292,7 @@ From raw data, we extracted behavioral features related to three routines: sleep
 
 \subsection*{Building routine clusters using GMM}\label{sec:methods:building_cluster}
 
-For each participant, we formed an $M \times N$ matrix of daily features ($N$ features over $M$ days) and fit a $K$-component GMM. The $K$ multivariate Gaussian components (means $\boldsymbol{\mu}_k$, covariances $\boldsymbol{\Sigma}_k$, weights $\pi_k$) represent latent routines. This approach captures both the mean behavioral profile (via the components' mean) and the variability and correlation among features (via the covariance matrices). Compared to clustering methods like K-Means, GMM offers greater flexibility. First, GMM supports soft clustering, meaning each day is assigned to multiple routine types with varying probabilities, modelling the transition nature of human behavior. Second, each GMM component can be parameterized by the full covariance structure, which captures the interdependencies between routines. For instance, increased phone activity late at night may correlate with delayed bedtime. 
+We pooled daily features across all participants in a study into a single $D \times N$ matrix ($N$ features over $D$ person-days) and fit one $K$-component GMM at the population level. The $K$ multivariate Gaussian components (means $\boldsymbol{\mu}_k$, covariances $\boldsymbol{\Sigma}_k$, weights $\pi_k$) represent latent routines shared across the population. This approach captures both the mean behavioral profile (via the components' mean) and the variability and correlation among features (via the covariance matrices). Compared to clustering methods like K-Means, GMM offers greater flexibility for modelling the fluid nature of daily behavior. First, GMM supports soft clustering: rather than committing each day to a single routine, the model returns a vector of membership probabilities $(u_{d1}, \ldots, u_{dK})$ with $\sum_k u_{dk} = 1$. This is well-suited to daily life, where transitional days, such as a sick day that disrupts a typical weekday, rarely conform to one routine. Second, each GMM component can be parameterized by the full covariance structure, which captures the inter-dependencies between routines. For instance, increased phone activity late at night may correlate with delayed bedtime.
 
 Tuning GMM involves two main hyperparameters: the number of components \(k\) and the covariance type (full, tied, diagonal, or spherical). Model selection was based on the Bayesian Information Criterion (BIC), with lower values indicating a better fit. For the model with a full covariance matrix, we quantified cluster separation by computing all pair-wise Bhattacharyya distances. For two multivariate Gaussian clusters \(p_1 \sim \mathcal{N}(\boldsymbol{\mu}_1, \boldsymbol{\Sigma}_1)\) and \(p_2 \sim \mathcal{N}(\boldsymbol{\mu}_2, \boldsymbol{\Sigma}_2)\), the Bhattacharyya distance is
 
@@ -322,28 +315,34 @@ where
 \]
 is the average covariance matrix, and \(\boldsymbol{\mu}_1,\boldsymbol{\mu}_2\) are the cluster mean vectors. Larger values indicate better separation between clusters.
 
-We assigned each day to one of the resulting components. This clustering process was carried out independently for each study. For GLOBEM, the dataset spanned multiple academic years, so we fitted the clustering model separately for each year (semester). The tuning result is presented in Appendix 1.
+We retained the full vector for each day rather than collapsing to a single label. This clustering process was carried out independently for each study. For GLOBEM, the dataset spanned multiple academic years, so we fitted the clustering model separately for each year (semester). The tuning result is presented in Appendix 1.
 
-\subsection*{Routine signature}\label{sec:methods:signature}  
+\subsection*{Routine signature}\label{sec:methods:signature} 
 
-Social signature describes how individuals persistently distribute their communication efforts across their social contacts \cite{saramaki2014persistence}. We extended this concept by introducing the notion of a routine signature—the characteristic way in which individuals distribute their time across recurring patterns of daily behavior. Our concept aims to capture the persistence  with which individuals structure their daily lives across different types of routines.
+Social signature describes how individuals persistently distribute their communication efforts across their social contacts \cite{saramaki2014persistence}. We extended this concept by introducing the notion of a routine signature: the characteristic way in which individuals distribute their time across recurring patterns of daily behavior. Our concept aims to capture the persistence with which individuals structure their daily lives across different types of routines.
 
-For each participant, we represented every day in terms of behavioral features and assigned a GMM cluster. Then, we summarized how often each cluster occurred for that participant by counting the number of days assigned to each cluster. To obtain a comparable distribution across individuals, these counts were normalized into proportions, giving the fraction of the participant’s days that belonged to each cluster.  
+For each participant, we represented every day by its vector of cluster assignment probabilities from the GMM $\mathbf{u}_d^{(i)} = (u_{d1}^{(i)}, \ldots, u_{dK}^{(i)})$. Then, we summarized how often each cluster occurred for that participant by summing the cluster assignment probabilities across all of their days, yielding the expected number of days $w_{ij} = \sum_d u_{dj}^{(i)}$ spent in each cluster $j$. To obtain a comparable distribution across individuals, these expected counts were normalized into proportions, giving the fraction of the participant's days that belonged to each cluster.
 
-The clusters were then ranked in descending order of frequency (rank 1 = the most common cluster for that participant).  The resulting vector of ranked proportions constitutes the \textit{routine signature} of that individual:
-
+The clusters were then ranked in descending order of frequency (rank 1 = the most common cluster for that participant). The resulting vector of ranked proportions constitutes the \textit{routine signature} of that individual:
 \begin{equation}
     \sigma_i = \left(
-    \frac{n_{i1}}{\sum_j n_{ij}},\;
-    \frac{n_{i2}}{\sum_j n_{ij}},\;
+    \frac{w_{i1}}{\sum_j w_{ij}},\;
+    \frac{w_{i2}}{\sum_j w_{ij}},\;
     \ldots,\;
-    \frac{n_{ik_i}}{\sum_j n_{ij}}
+    \frac{w_{ik_i}}{\sum_j w_{ij}}
     \right),
 \end{equation}
+where $w_{ij} = \sum_d u_{dj}^{(i)}$ is the expected number of days participant $i$ spent in cluster $j$, and the elements are ordered so that $\sigma_{i1} \geq \sigma_{i2} \geq \dots \geq \sigma_{ik}$ with $k$ being the number of clusters.
 
-where \(n_{ij}\) is the number of days participant \(i\) spent in cluster \(j\), and the elements are ordered so that \(\sigma_{i1} \geq \sigma_{i2} \geq \dots \geq \sigma_{ik}\) with $k$ being the number of cluster.  
+To additionally capture the order in which routines occur, we define a \textit{transition signature} based on day-to-day movement between clusters. For each participant, we computed a $K \times K$ matrix whose entry $T_{jk}^{(i)}$ is the expected number of $j \to k$ transitions, obtained by summing the outer products of consecutive days' cluster assignment probabilities:
 
-Intuitively, the routine signature reflects the individual pattern of time allocation across latent routines, independent of the cluster labels themselves. In line with the concept of social signatures, we expect this pattern to persist over time.
+\begin{equation}
+    T_{jk}^{(i)} = \sum_{d=1}^{M_i - 1} u_{dj}^{(i)} \cdot u_{d+1,k}^{(i)}.
+\end{equation}
+
+Row-normalizing $T^{(i)}$ yields the conditional transition probability $P_{jk}^{(i)} = T_{jk}^{(i)} / \sum_{k'} T_{jk'}^{(i)}$, which gives the probability of moving to cluster $k$ given the current cluster $j$. The resulting matrix $\mathbf{P}^{(i)}$ constitutes the transition signature of participant $i$.
+
+Intuitively, the routine signature describes what routines a person inhabits, while the transition signature describes how they move between them. In line with the concept of social signatures, we expect both patterns to persist over time.
 
 \subsection*{Persistence of routine signatures}\label{sec:methods:signature_persistence}  
 
