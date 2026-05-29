@@ -190,7 +190,7 @@ substantially more similar to their own than to the signatures of other individu
 (\dself{0.116}{0.047} vs.\ \dref{0.148}{0.023};
 \dselfdrefp{213.87}{-7.3}{10^{-3}}) and cosine distance
 (\dself{0.028}{0.027} vs.\ \dref{0.052}{0.016};
-\dselfdrefp{240.26}{-9.38}{0.0}). The same pattern held in MoMo-Mood
+\dselfdrefp{240.26}{-9.38}{10^{-3}}). The same pattern held in MoMo-Mood
 and GLOBEM, with full statistics reported in the Appendix. Crucially, this
 persistence was visible both over short observation windows of a few weeks in GLOBEM and over long windows of several months in Tesserae and MoMo-Mood,
 indicating that routine signatures are not a short-term artifact of a particular season.
@@ -289,8 +289,7 @@ From raw data, we extracted behavioral features related to three routines: sleep
 \end{table}
 
 \subsection*{Building routine clusters using GMM}\label{sec:methods:building_cluster}
-
-We pooled daily features across all participants in a study into a single $D \times N$ matrix ($N$ features over $D$ person-days) and fit one $K$-component GMM at the population level. The $K$ multivariate Gaussian components (means $\boldsymbol{\mu}_k$, covariances $\boldsymbol{\Sigma}_k$, weights $\pi_k$) represent latent routines shared across the population. This approach captures both the mean behavioral profile (via the components' mean) and the variability and correlation among features (via the covariance matrices). Compared to clustering methods like K-Means, GMM offers greater flexibility for modelling the fluid nature of daily behavior. First, GMM supports soft clustering: rather than committing each day to a single routine, the model returns a vector of membership probabilities $(u_{d1}, \ldots, u_{dK})$ with $\sum_k u_{dk} = 1$. This is well-suited to daily life, where transitional days, such as a sick day that disrupts a typical weekday, rarely conform to one routine. Second, each GMM component can be parameterized by the full covariance structure, which captures the inter-dependencies between routines. For instance, increased phone activity late at night may correlate with delayed bedtime.
+We pooled daily features across all participants in a study into a single $D \times N$ matrix ($N$ features over $D$ person-days) and fitted one $K$-component GMM at the population level. The $K$ multivariate Gaussian components (means $\boldsymbol{\mu}_k$, covariances $\boldsymbol{\Sigma}_k$, weights $\pi_k$) represent latent routines shared across the population. This approach captures both the mean behavioral profile (via the components' means) and the variability and correlation among features (via the covariance matrices). Compared to clustering methods like K-Means, GMM offers greater flexibility for modelling the fluid nature of daily behavior. First, GMM supports soft clustering: rather than committing each day to a single routine, the model assigns each day a vector of membership probabilities $(u_{d1}, \ldots, u_{dK})$ with $\sum_k u_{dk} = 1$. This is appropriate for modelling daily life, where transitional days such as a sick day that disrupts a typical weekday, rarely conform to a single routine. Second, each GMM component can be parameterized by a full covariance structure, which captures inter-dependencies between features. For instance, increased phone activity late at night may correlate with a delayed bedtime.
 
 Tuning GMM involves two main hyperparameters: the number of components \(k\) and the covariance type (full, tied, diagonal, or spherical). Model selection was based on the Bayesian Information Criterion (BIC), with lower values indicating a better fit. For the model with a full covariance matrix, we quantified cluster separation by computing all pair-wise Bhattacharyya distances. For two multivariate Gaussian clusters \(p_1 \sim \mathcal{N}(\boldsymbol{\mu}_1, \boldsymbol{\Sigma}_1)\) and \(p_2 \sim \mathcal{N}(\boldsymbol{\mu}_2, \boldsymbol{\Sigma}_2)\), the Bhattacharyya distance is
 
@@ -352,19 +351,22 @@ JSD(\sigma_1, \sigma_2) = H(\frac{\sigma_1 + \sigma_2}{2}) - \frac{1}{2}[H(\sigm
 
 where $\sigma_1$ and $\sigma_2$ are the social signatures defined in Eq. 1, and $H(\sigma)$ is the Shannon entropy of $\sigma$.
 
-To determine how well one maintains their routines over time, we define $d_{self} =  d_{12}$. We validate an individual's persistence against the population by computing the reference distance $d_{ref} = \frac{1}{2}* (d_{i1j1} + d_{i2j2} )$. That is, we compute the routine signature in each time split of individual $i$ against that from the same time split of individual $j$.
-
+To quantify how well an individual maintains their routine over time, we define the self-distance as the JSD between their signatures in the two consecutive time splits:
+\begin{equation}
+d_{\text{self}}(i) = \text{JSD}\!\left(\sigma_i^{(1)}, \sigma_i^{(2)}\right),
+\end{equation}
+where $\sigma_i^{(1)}$ and $\sigma_i^{(2)}$ denote the routine signatures of individual $i$ in the first and second time split, respectively. To benchmark this within-person persistence against between-person variability, we compute the reference distance as the average JSD between $i$'s signatures and those of every other individual $j$, matched by time split:
+\begin{equation}
+d_{\text{ref}}(i) = \frac{1}{N-1} \sum_{j \neq i} \frac{1}{2}\left[\text{JSD}\!\left(\sigma_i^{(1)}, \sigma_j^{(1)}\right) + \text{JSD}\!\left(\sigma_i^{(2)}, \sigma_j^{(2)}\right)\right],
+\end{equation}
+where $N$ is the number of individuals in the study. Comparing signatures within the same time split controls for any temporal shifts in the population (e.g., seasonal effects) that could otherwise inflate between-person distances. If $d_{\text{self}}(i) < d_{\text{ref}}(i)$, individual $i$'s routine is more similar to their own past than to others' routines, indicating a persistent and person-specific signature.
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/digi-schema.png}
-    \caption{Schematic description of routine signature. (A) Raw data capturing each person-day’s routine (e.g., sleep times, screen use, activity levels).
-(B) Gaussian Mixture Model fitted on the pooled person-day assigns each day to one of the routine clusters.
-(C) For each individual, the number of days falling into each GMM‐defined cluster is computed and clusters are ranked by descending day‐counts.
-(D) These counts are converted into proportions, giving each person’s routine signature.}
+    \caption{Schematic description of the routine signature. (A) Raw data capturing each person-day's behavior (e.g., sleep times, screen use, activity levels). (B) A Gaussian Mixture Model fitted on the pooled person-days assigns each day a vector of cluster assignment probabilities across $K$ latent routine clusters. (C) For each individual, the expected number of days in each cluster is computed by summing cluster assignment probabilities across days, and clusters are ranked in descending order of frequency. (D) These expected counts are normalized into proportions, yielding the individual's routine signature.}
     \label{fig:routine-sig-workflow}
 \end{figure}
-
 
 %%===========================================================================================%%
 %% If you are submitting to one of the Nature Portfolio journals, using the eJP submission   %%
